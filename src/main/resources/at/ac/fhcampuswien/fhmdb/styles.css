@@ -24,6 +24,11 @@
     -fx-text-fill: white;
 }
 
+.text-lightgray-italic {
+    -fx-text-fill: #AAAAAA; /* light-gray */
+    -fx-font-style: italic; /* italic */
+}
+
 .list-view .list-cell:odd {
     -fx-background-color: black;
     -fx-text-fill: white;

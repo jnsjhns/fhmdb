@@ -8,11 +8,13 @@ import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXListView;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -52,17 +54,42 @@ public class HomeController implements Initializable {
         // TODO add event handlers to buttons and call the regarding methods
         // either set event handlers in the fxml file (onAction) or add them here
 
-        // Sort button example:
-        sortBtn.setOnAction(actionEvent -> {
-            if(sortBtn.getText().equals("Sort (asc)")) {
-                // TODO sort observableMovies ascending
-                sortBtn.setText("Sort (desc)");
-            } else {
-                // TODO sort observableMovies descending
-                sortBtn.setText("Sort (asc)");
-            }
-        });
+
 
 
     }
+
+    @FXML
+    public void onSortButtonClick (ActionEvent event) {
+        if (sortState == SortState.NONE || sortState == SortState.DESCENDING) {
+            sortState = SortState.ASCENDING;
+            sortBtn.setText("Sort (desc)"); // Button-Text auf "Sort (desc)" setzen
+        } else {
+            sortState = SortState.DESCENDING;
+            sortBtn.setText("Sort (asc)"); // Button-Text auf "Sort (asc)" setzen
+        }
+        sortFilms(sortState);
+    }
+
+    public void sortFilms (SortState sortState) {
+        if (sortState == SortState.ASCENDING) {
+            observableMovies.sort(Comparator.comparing(Movie::getTitle)); // Sortiere aufsteigend nach Titel
+        } else if (sortState == SortState.DESCENDING){
+            observableMovies.sort(Comparator.comparing(Movie::getTitle).reversed()); // Sortiere absteigend nach Titel
+        }
+    }
+
+    /*
+    // Sort button example:
+        sortBtn.setOnAction(actionEvent -> {
+        if(sortBtn.getText().equals("Sort (asc)")) {
+            // TODO sort observableMovies ascending
+            sortBtn.setText("Sort (desc)");
+        } else {
+            // TODO sort observableMovies descending
+            sortBtn.setText("Sort (asc)");
+        }
+    });
+    */
+
 }

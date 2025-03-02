@@ -15,12 +15,17 @@ public class Movie {
         this.genres = genres;
     }
 
+    // getter
     public String getTitle() {
         return title;
     }
 
     public String getDescription() {
         return description;
+    }
+
+    public List<Genre> getGenres() {
+        return genres;
     }
 
     public static List<Movie> initializeMovies(){
@@ -65,7 +70,7 @@ public class Movie {
         return movies;
     }
 
-    public List<Genre> getGenres() {
-        return genres;
-    }
+
+
+
 }
