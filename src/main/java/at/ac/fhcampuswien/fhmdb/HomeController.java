@@ -65,23 +65,69 @@ public class HomeController implements Initializable {
     }
 
 
-
-
     @FXML
     public void onSortButtonClick (ActionEvent event) {
+        handleSortButtonClick();
+    }
+
+    public SortState toggleSortState() {
         if (sortState == SortState.NONE || sortState == SortState.DESCENDING) {
             sortState = SortState.ASCENDING;
-            sortButton.setText("Sort (desc)");
         } else {
             sortState = SortState.DESCENDING;
-            sortButton.setText("Sort (asc)");
         }
-        sortMovies(sortState);
+        return sortState;
+    }
+
+    public void updateSortButtonText() {
+        if (sortButton != null) {
+            sortButton.setText(sortState == SortState.ASCENDING ? "Sort (desc)" : "Sort (asc)");
+        }
+    }
+
+    public void handleSortButtonClick() {
+        SortState newState = toggleSortState();
+        updateSortButtonText();
+        sortMovies(newState);
     }
 
 
     @FXML
     public void onFilterButtonClick(ActionEvent event) {
+        handleFilterButtonClick();
+    }
+
+    public void handleFilterButtonClick() {
+        String selectedGenreString = getSelectedGenre();
+        String query = getSearchQuery();
+        Genre selectedGenre = parseGenre(selectedGenreString);
+        List<Movie> filteredMovies = applyFilters(selectedGenre, query);
+        updateObservableMovies(filteredMovies);
+    }
+
+    private String getSelectedGenre() {
+        return genreComboBox != null ? (String) genreComboBox.getValue() : null;
+    }
+
+    private String getSearchQuery() {
+        return searchField != null ? searchField.getText().trim() : "";
+    }
+
+    private Genre parseGenre(String genreString) {
+        return (genreString != null && !genreString.isEmpty()) ? Genre.valueOf(genreString) : null;
+    }
+
+    public List<Movie> applyFilters(Genre genre, String query) {
+        List<Movie> moviesFilteredBySearchQuery = filterBySearchQuery(query);
+        return filterByGenre(moviesFilteredBySearchQuery, genre);
+    }
+
+    private void updateObservableMovies(List<Movie> movies) {
+        observableMovies.setAll(movies);
+    }
+
+    /* old version
+    public void handleFilterButtonClick () {
         String selectedGenreString = (String) genreComboBox.getValue();
         Genre selectedGenre = null;
 
@@ -99,6 +145,7 @@ public class HomeController implements Initializable {
 
         observableMovies.setAll(filteredMovies); // setAll, clears and adds
     }
+     */
 
 
     public void sortMovies (SortState sortState) {

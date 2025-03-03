@@ -105,6 +105,7 @@ class HomeControllerTest {
         assertEquals(expectedTitles, actualTitles);
     }
 
+
     @Test
     void movie_list_is_sorted_descending_if_button_displays_asc() {
         // GIVEN
@@ -125,5 +126,73 @@ class HomeControllerTest {
         assertEquals(expectedTitles, actualTitles);
     }
 
+    @Test
+    void sortState_changes_to_ascending_when_initial_state_is_none() {
+        // GIVEN
+        homeController.sortState = SortState.NONE; // Setze den initialen Zustand auf NONE
+        Movie movieA = new Movie("B Movie", "Description", List.of());
+        Movie movieB = new Movie("A Movie", "Description", List.of());
+        Movie movieC = new Movie("C Movie", "Description", List.of());
+        homeController.observableMovies.addAll(movieB, movieA, movieC);
+
+        // WHEN
+        homeController.handleSortButtonClick(); // Rufe die Sortierlogik auf
+
+        // THEN
+        assertEquals(SortState.ASCENDING, homeController.sortState,
+                "Der Sortierzustand sollte auf ASCENDING wechseln.");
+
+        List<String> actualTitles = homeController.observableMovies.stream()
+                .map(Movie::getTitle)
+                .toList();
+        List<String> expectedTitles = Arrays.asList("A Movie", "B Movie", "C Movie");
+
+        assertEquals(expectedTitles, actualTitles,
+                "Die Filme sollten alphabetisch aufsteigend sortiert sein.");
+    }
+
+
+    @Test
+    void filter_by_genre_THRILLER_should_lead_to_2_results() {
+        // given
+        Genre genre = Genre.THRILLER;
+
+        // when
+        homeController.initializeState();
+        List<Movie> filteredList = homeController.filterByGenre(homeController.allMovies, genre);
+
+        // then
+        assertEquals(filteredList.size(), 2);
+    }
+
+    @Test
+    void filter_by_genre_WAR_should_lead_to_0_results() {
+        // given
+        Genre genre = Genre.WAR;
+
+        // when
+        homeController.initializeState();
+        List<Movie> filteredList = homeController.filterByGenre(homeController.allMovies, genre);
+
+        // then
+        assertEquals(filteredList.size(), 0);
+    }
+
+    @Test
+    void filter_by_genre_null_should_lead_to_9_results() {
+        // given
+        Genre genre = null;
+
+        // when
+        homeController.initializeState();
+        List<Movie> filteredList = homeController.filterByGenre(homeController.allMovies, genre);
+
+        // then
+        assertEquals(filteredList.size(), 9);
+    }
+
+
+
 
 }
+
