@@ -1,5 +1,6 @@
 package at.ac.fhcampuswien.fhmdb;
 
+import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.models.SortState;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
@@ -14,13 +15,11 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
-import java.util.Comparator;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class HomeController implements Initializable {
     @FXML
-    public JFXButton searchBtn;
+    public JFXButton filterButton;
 
     @FXML
     public TextField searchField;
@@ -32,13 +31,13 @@ public class HomeController implements Initializable {
     public JFXComboBox genreComboBox;
 
     @FXML
-    public JFXButton sortBtn;
+    public JFXButton sortButton;
 
     public List<Movie> allMovies = Movie.initializeMovies();
 
-    private final ObservableList<Movie> observableMovies = FXCollections.observableArrayList();   // automatically updates corresponding UI elements when underlying data changes
+    protected final ObservableList<Movie> observableMovies = FXCollections.observableArrayList();   // automatically updates corresponding UI elements when underlying data changes
 
-    private SortState sortState = SortState.NONE;
+    protected SortState sortState = SortState.NONE;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -50,9 +49,10 @@ public class HomeController implements Initializable {
 
         // TODO add genre filter items with genreComboBox.getItems().addAll(...)
         genreComboBox.setPromptText("Filter by Genre");
+        genreComboBox.getItems().add(null);
+        genreComboBox.getItems().addAll(Genre.values());
 
-        // TODO add event handlers to buttons and call the regarding methods
-        // either set event handlers in the fxml file (onAction) or add them here
+
 
 
 
@@ -63,33 +63,67 @@ public class HomeController implements Initializable {
     public void onSortButtonClick (ActionEvent event) {
         if (sortState == SortState.NONE || sortState == SortState.DESCENDING) {
             sortState = SortState.ASCENDING;
-            sortBtn.setText("Sort (desc)"); // Button-Text auf "Sort (desc)" setzen
+            sortButton.setText("Sort (desc)");
         } else {
             sortState = SortState.DESCENDING;
-            sortBtn.setText("Sort (asc)"); // Button-Text auf "Sort (asc)" setzen
+            sortButton.setText("Sort (asc)");
         }
-        sortFilms(sortState);
+        sortMovies(sortState);
     }
 
-    public void sortFilms (SortState sortState) {
+
+    @FXML
+    public void onFilterButtonClick(ActionEvent event) {
+        Genre selectedGenre = (Genre) genreComboBox.getValue();
+        String query = searchField.getText().trim();
+
+        List<Movie> filteredMovies = filterBySearchQuery(query);
+        filteredMovies = filterByGenre(filteredMovies, selectedGenre);
+
+        observableMovies.clear();
+        observableMovies.addAll(filteredMovies);
+    }
+
+
+    public void sortMovies (SortState sortState) {
         if (sortState == SortState.ASCENDING) {
-            observableMovies.sort(Comparator.comparing(Movie::getTitle)); // Sortiere aufsteigend nach Titel
+            observableMovies.sort(Comparator.comparing(Movie::getTitle));
         } else if (sortState == SortState.DESCENDING){
-            observableMovies.sort(Comparator.comparing(Movie::getTitle).reversed()); // Sortiere absteigend nach Titel
+            observableMovies.sort(Comparator.comparing(Movie::getTitle).reversed());
         }
     }
 
-    /*
-    // Sort button example:
-        sortBtn.setOnAction(actionEvent -> {
-        if(sortBtn.getText().equals("Sort (asc)")) {
-            // TODO sort observableMovies ascending
-            sortBtn.setText("Sort (desc)");
+    public List<Movie> filterByGenre(List<Movie> moviesFilteredBySearchQuery, Genre genre) {
+        List<Movie> moviesfilteredByGenre = new ArrayList<>();
+        if (genre != null) {
+            for (Movie movie : moviesFilteredBySearchQuery) {
+                if (movie.getGenres().contains(genre)) {
+                    moviesfilteredByGenre.add(movie);
+                }
+            }
+            return moviesfilteredByGenre;
         } else {
-            // TODO sort observableMovies descending
-            sortBtn.setText("Sort (asc)");
+            return moviesFilteredBySearchQuery;
         }
-    });
-    */
+    }
+
+
+    public List<Movie> filterBySearchQuery (String query) {
+        Set<Movie> filteredMovies = new HashSet<>(); // no duplicates in Sets
+        if (query != null && !(query.isEmpty())) {
+            for (Movie movie : allMovies) {
+                if (movie.getTitle().toLowerCase().contains(query.toLowerCase())) {
+                    filteredMovies.add(movie);
+                }
+                if (movie.getDescription().toLowerCase().contains(query.toLowerCase())) {
+                    filteredMovies.add(movie);
+                }
+            }
+            List<Movie> moviesFilteredBySearchQuery = new ArrayList<>(filteredMovies);
+            return moviesFilteredBySearchQuery;
+        } else {
+            return allMovies;
+        }
+    }
 
 }
