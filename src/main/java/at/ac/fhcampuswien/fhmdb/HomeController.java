@@ -113,7 +113,7 @@ public class HomeController implements Initializable {
         return searchField != null ? searchField.getText().trim() : "";
     }
 
-    private Genre parseGenre(String genreString) {
+    protected Genre parseGenre(String genreString) {
         return (genreString != null && !genreString.isEmpty()) ? Genre.valueOf(genreString) : null;
     }
 
@@ -183,8 +183,7 @@ public class HomeController implements Initializable {
                     filteredMovies.add(movie);
                 }
             }
-            List<Movie> moviesFilteredBySearchQuery = new ArrayList<>(filteredMovies);
-            return moviesFilteredBySearchQuery;
+            return new ArrayList<>(filteredMovies);
         } else {
             return allMovies;
         }

@@ -24,23 +24,12 @@ class HomeControllerTest {
 
     @Test
     void ensure_allMovies_and_observableMovies_are_identical_initially() {
-        // GIVEN
-
         // WHEN
         homeController.initializeState();
 
         // THEN
-        assertEquals(homeController.allMovies.size(), homeController.observableMovies.size(),
-                "Die Größen von allMovies und observableMovies sollten gleich sein");
-
-        for (int i = 0; i < homeController.allMovies.size(); i++) {
-            assertEquals(homeController.allMovies.get(i), homeController.observableMovies.get(i),
-                    "Film an Index " + i + " sollte in beiden Listen gleich sein");
-        }
-
-        assertTrue(homeController.allMovies.containsAll(homeController.observableMovies) &&
-                        homeController.observableMovies.containsAll(homeController.allMovies),
-                "Beide Listen sollten die gleichen Elemente enthalten");
+        assertEquals(homeController.allMovies, homeController.observableMovies,
+                "allMovies and observableMovies should be identical after initialization");
     }
 
     @Test
@@ -54,8 +43,26 @@ class HomeControllerTest {
 
         // Then
         assertTrue(result.stream().anyMatch(movie -> movie.getTitle().equals("Oppenheimer")));
-        assertTrue(result.size() >= 1);
+        assertTrue(!result.isEmpty());
     }
+
+
+    @Test
+    void filter_by_empty_genre_string_should_result_in_full_film_list() {
+        // Given
+        String selectedGenreString = "";
+        String query = "";
+        homeController.initializeState();
+
+        // When
+        Genre selectedGenre = homeController.parseGenre(selectedGenreString);
+        List<Movie> result = homeController.applyFilters(selectedGenre, query);
+
+        // Then
+        assertEquals(homeController.allMovies, result,
+                "Filtering with empty genre and query should return all movies");
+    }
+
 
 
     @Test
@@ -69,8 +76,10 @@ class HomeControllerTest {
 
         // Then
         assertTrue(result.stream().anyMatch(movie -> movie.getTitle().equals("Oppenheimer")));
-        assertTrue(result.size() >= 1);
+        assertTrue(!result.isEmpty());
     }
+
+
 
     @Test
     void filter_by_search_query_search_for_and() {
@@ -84,6 +93,38 @@ class HomeControllerTest {
         // Then
         assertEquals(6, result.size());
     }
+
+
+
+    @Test
+    void empty_search_query_returns_all_movies() {
+        // Given
+        String query = "";
+        homeController.initializeState();
+
+        // When
+        List<Movie> result = homeController.filterBySearchQuery(query);
+
+        // Then
+        assertEquals(homeController.allMovies.size(), result.size());
+        assertTrue(result.containsAll(homeController.allMovies));
+    }
+
+
+    @Test
+    void filter_by_search_query_and_genre_should_return_correct_results() {
+        // Given
+        String query = "man";
+        Genre genre = Genre.DRAMA;
+        homeController.initializeState();
+
+        // When
+        List<Movie> result = homeController.applyFilters(genre, query);
+
+        // Then
+        assertEquals(4, result.size());
+    }
+
 
     @Test
     void movie_list_is_sorted_ascending_if_button_displays_desc() {
@@ -129,26 +170,22 @@ class HomeControllerTest {
     @Test
     void sortState_changes_to_ascending_when_initial_state_is_none() {
         // GIVEN
-        homeController.sortState = SortState.NONE; // Setze den initialen Zustand auf NONE
-        Movie movieA = new Movie("B Movie", "Description", List.of());
-        Movie movieB = new Movie("A Movie", "Description", List.of());
-        Movie movieC = new Movie("C Movie", "Description", List.of());
-        homeController.observableMovies.addAll(movieB, movieA, movieC);
+        homeController.sortState = SortState.NONE;
+        homeController.observableMovies.addAll(
+                new Movie("B Movie", "Description", List.of()),
+                new Movie("A Movie", "Description", List.of()),
+                new Movie("C Movie", "Description", List.of())
+        );
 
         // WHEN
-        homeController.handleSortButtonClick(); // Rufe die Sortierlogik auf
+        homeController.handleSortButtonClick();
 
         // THEN
-        assertEquals(SortState.ASCENDING, homeController.sortState,
-                "Der Sortierzustand sollte auf ASCENDING wechseln.");
+        assertEquals(SortState.ASCENDING, homeController.sortState, "Sort state should change to ASCENDING");
 
-        List<String> actualTitles = homeController.observableMovies.stream()
-                .map(Movie::getTitle)
-                .toList();
         List<String> expectedTitles = Arrays.asList("A Movie", "B Movie", "C Movie");
-
-        assertEquals(expectedTitles, actualTitles,
-                "Die Filme sollten alphabetisch aufsteigend sortiert sein.");
+        List<String> actualTitles = homeController.observableMovies.stream().map(Movie::getTitle).toList();
+        assertEquals(expectedTitles, actualTitles, "Movies should be sorted in ascending order");
     }
 
 
