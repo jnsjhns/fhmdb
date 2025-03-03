@@ -33,15 +33,16 @@ public class HomeController implements Initializable {
     @FXML
     public JFXButton sortButton;
 
-    public List<Movie> allMovies = Movie.initializeMovies();
+    public List<Movie> allMovies;
 
     protected final ObservableList<Movie> observableMovies = FXCollections.observableArrayList();   // automatically updates corresponding UI elements when underlying data changes
 
-    protected SortState sortState = SortState.NONE;
+    protected SortState sortState;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        observableMovies.addAll(allMovies);         // add dummy data to observable list
+
+        initializeState();
 
         // initialize UI stuff
         movieListView.setItems(observableMovies);   // set data of observable list to list view
@@ -54,6 +55,13 @@ public class HomeController implements Initializable {
         for (Genre genre : Genre.values()) {
             genreComboBox.getItems().add(genre.toString());
         }
+    }
+
+    public void initializeState (){
+        // initialize movies and SortState
+        allMovies = Movie.initializeMovies();
+        sortState = SortState.NONE;
+        observableMovies.setAll(allMovies);
     }
 
 
@@ -76,17 +84,20 @@ public class HomeController implements Initializable {
     public void onFilterButtonClick(ActionEvent event) {
         String selectedGenreString = (String) genreComboBox.getValue();
         Genre selectedGenre = null;
+
         // cast selection to type genre if it's valid
         if (selectedGenreString != null && !selectedGenreString.isEmpty()) {
             selectedGenre = Genre.valueOf(selectedGenreString);
         }
         String query = searchField.getText().trim();
 
+        // filterBySearchQuery is called first
         List<Movie> filteredMovies = filterBySearchQuery(query);
+
+        // The result of filterBySearchQuery is passed to filterByGenre
         filteredMovies = filterByGenre(filteredMovies, selectedGenre);
 
-        observableMovies.clear();
-        observableMovies.addAll(filteredMovies);
+        observableMovies.setAll(filteredMovies); // setAll, clears and adds
     }
 
 
@@ -98,6 +109,7 @@ public class HomeController implements Initializable {
         }
     }
 
+    // function is called after filterBySearchQuery and has the return value as argument
     public List<Movie> filterByGenre(List<Movie> moviesFilteredBySearchQuery, Genre genre) {
         List<Movie> moviesfilteredByGenre = new ArrayList<>();
         if (genre != null) {

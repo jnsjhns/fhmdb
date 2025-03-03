@@ -3,8 +3,7 @@ package at.ac.fhcampuswien.fhmdb;
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.models.SortState;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,11 +23,33 @@ class HomeControllerTest {
     }
 
     @Test
+    void ensure_allMovies_and_observableMovies_are_identical_initially() {
+        // GIVEN
+
+        // WHEN
+        homeController.initializeState();
+
+        // THEN
+        assertEquals(homeController.allMovies.size(), homeController.observableMovies.size(),
+                "Die Größen von allMovies und observableMovies sollten gleich sein");
+
+        for (int i = 0; i < homeController.allMovies.size(); i++) {
+            assertEquals(homeController.allMovies.get(i), homeController.observableMovies.get(i),
+                    "Film an Index " + i + " sollte in beiden Listen gleich sein");
+        }
+
+        assertTrue(homeController.allMovies.containsAll(homeController.observableMovies) &&
+                        homeController.observableMovies.containsAll(homeController.allMovies),
+                "Beide Listen sollten die gleichen Elemente enthalten");
+    }
+
+    @Test
     void filter_by_search_query_title_match() {
         // Given
         String query = "Oppenheimer";
 
         // When
+        homeController.initializeState();
         List<Movie> result = homeController.filterBySearchQuery(query);
 
         // Then
@@ -43,6 +64,7 @@ class HomeControllerTest {
         String query = "oppenHeiMer";
 
         // When
+        homeController.initializeState();
         List<Movie> result = homeController.filterBySearchQuery(query);
 
         // Then
@@ -56,6 +78,7 @@ class HomeControllerTest {
         String query = "and";
 
         // When
+        homeController.initializeState();
         List<Movie> result = homeController.filterBySearchQuery(query);
 
         // Then
