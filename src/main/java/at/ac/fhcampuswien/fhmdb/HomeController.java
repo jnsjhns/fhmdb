@@ -47,17 +47,17 @@ public class HomeController implements Initializable {
         movieListView.setItems(observableMovies);   // set data of observable list to list view
         movieListView.setCellFactory(movieListView -> new MovieCell()); // use custom cell factory to display data
 
-        // TODO add genre filter items with genreComboBox.getItems().addAll(...)
+        // initialize ComboBox with all Genres + "" for selection without filter
         genreComboBox.setPromptText("Filter by Genre");
-        genreComboBox.getItems().add(null);
-        genreComboBox.getItems().addAll(Genre.values());
-
-
-
-
-
-
+        genreComboBox.getItems().clear();
+        genreComboBox.getItems().add("");
+        for (Genre genre : Genre.values()) {
+            genreComboBox.getItems().add(genre.toString());
+        }
     }
+
+
+
 
     @FXML
     public void onSortButtonClick (ActionEvent event) {
@@ -74,7 +74,12 @@ public class HomeController implements Initializable {
 
     @FXML
     public void onFilterButtonClick(ActionEvent event) {
-        Genre selectedGenre = (Genre) genreComboBox.getValue();
+        String selectedGenreString = (String) genreComboBox.getValue();
+        Genre selectedGenre = null;
+        // cast selection to type genre if it's valid
+        if (selectedGenreString != null && !selectedGenreString.isEmpty()) {
+            selectedGenre = Genre.valueOf(selectedGenreString);
+        }
         String query = searchField.getText().trim();
 
         List<Movie> filteredMovies = filterBySearchQuery(query);
