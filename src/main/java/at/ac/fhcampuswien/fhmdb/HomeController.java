@@ -47,6 +47,7 @@ public class HomeController implements Initializable {
         // initialize UI stuff
         movieListView.setItems(observableMovies);   // set data of observable list to list view
         movieListView.setCellFactory(movieListView -> new MovieCell()); // use custom cell factory to display data
+        sortButton.setPrefWidth(75);
 
         // initialize ComboBox with all Genres + "" for selection without filter
         genreComboBox.setPromptText("Filter by Genre");
@@ -81,7 +82,7 @@ public class HomeController implements Initializable {
 
     public void updateSortButtonText() {
         if (sortButton != null) {
-            sortButton.setText(sortState == SortState.ASCENDING ? "Sort (desc)" : "Sort (asc)");
+            sortButton.setText(sortState == SortState.ASCENDING ? "Sort (desc)" : "Sort  (asc)");
         }
     }
 
