@@ -22,6 +22,8 @@ class HomeControllerTest {
         homeController = new HomeController();
     }
 
+
+
     @Test
     void ensure_allMovies_and_observableMovies_are_identical_initially() {
         // When
@@ -31,6 +33,8 @@ class HomeControllerTest {
         assertEquals(homeController.allMovies, homeController.observableMovies,
                 "allMovies and observableMovies should be identical after initialization");
     }
+
+
 
     @Test
     void filter_by_search_query_title_match() {
@@ -47,8 +51,9 @@ class HomeControllerTest {
     }
 
 
+
     @Test
-    void filter_by_empty_genre_string_should_result_in_full_film_list() {
+    void filter_by_empty_genre_string_should_result_in_full_movie_list() {
         // Given
         String selectedGenreString = "";
         String query = "";
@@ -62,6 +67,7 @@ class HomeControllerTest {
         assertEquals(homeController.allMovies, result,
                 "Filtering with empty genre and query should return all movies");
     }
+
 
 
     @Test
@@ -79,6 +85,7 @@ class HomeControllerTest {
     }
 
 
+
     @Test
     void filter_by_search_query_search_for_and() {
         // Given
@@ -91,6 +98,7 @@ class HomeControllerTest {
         // Then
         assertEquals(6, result.size());
     }
+
 
 
     @Test
@@ -108,6 +116,7 @@ class HomeControllerTest {
     }
 
 
+
     @Test
     void filter_by_search_query_and_genre_should_return_correct_results() {
         // Given
@@ -121,6 +130,8 @@ class HomeControllerTest {
         // Then
         assertEquals(4, result.size());
     }
+
+
 
     @Test
     void toggle_sort_state_should_change_state_correctly() {
@@ -138,46 +149,50 @@ class HomeControllerTest {
     }
 
 
+
     @Test
-    void movie_list_is_sorted_ascending_if_button_displays_desc() {
+    void movie_list_is_sorted_ascending_if_sort_state_is_descending () {
         // Given
-        HomeController controller = new HomeController();
         Movie movieA = new Movie("MovieA", "descriptionA", List.of(Genre.ADVENTURE));
         Movie movieB = new Movie("MovieB", "descriptionB", List.of(Genre.HORROR));
         Movie movieC = new Movie("MovieC", "descriptionC", List.of(Genre.ROMANCE));
-        controller.observableMovies.addAll(movieC, movieA, movieB);
+        homeController.observableMovies.addAll(movieC, movieA, movieB);
+        homeController.sortState = SortState.DESCENDING;
 
         // When
-        controller.sortMovies(SortState.ASCENDING);
+        homeController.handleSortButtonClick();
 
         // Then
         List<String> expectedTitles = Arrays.asList("MovieA", "MovieB", "MovieC");
-        List<String> actualTitles = controller.observableMovies.stream()
+        List<String> actualTitles = homeController.observableMovies.stream()
                 .map(Movie::getTitle)
                 .collect(Collectors.toList());
         assertEquals(expectedTitles, actualTitles);
     }
+
 
 
     @Test
-    void movie_list_is_sorted_descending_if_button_displays_asc() {
+    void movie_list_is_sorted_descending_if_sort_state_is_ascending () {
         // Given
-        HomeController controller = new HomeController();
         Movie movieA = new Movie("MovieA", "descriptionA", List.of(Genre.ADVENTURE));
         Movie movieB = new Movie("MovieB", "descriptionB", List.of(Genre.HORROR));
         Movie movieC = new Movie("MovieC", "descriptionC", List.of(Genre.ROMANCE));
-        controller.observableMovies.addAll(movieC, movieA, movieB);
+        homeController.observableMovies.addAll(movieC, movieA, movieB);
+        homeController.sortState = SortState.ASCENDING;
 
         // When
-        controller.sortMovies(SortState.DESCENDING);
+        homeController.handleSortButtonClick();
 
         // Then
         List<String> expectedTitles = Arrays.asList("MovieC", "MovieB", "MovieA");
-        List<String> actualTitles = controller.observableMovies.stream()
+        List<String> actualTitles = homeController.observableMovies.stream()
                 .map(Movie::getTitle)
                 .collect(Collectors.toList());
         assertEquals(expectedTitles, actualTitles);
     }
+
+
 
     @Test
     void sortState_changes_to_ascending_when_initial_state_is_none() {
@@ -201,6 +216,7 @@ class HomeControllerTest {
     }
 
 
+
     @Test
     void filter_by_genre_THRILLER_should_lead_to_2_results() {
         // Given
@@ -214,6 +230,23 @@ class HomeControllerTest {
         assertEquals(filteredList.size(), 2, "allMovies contains 2 movies with genre THRILLER.");
     }
 
+
+
+    @Test
+    void filter_by_genre_DRAMA_should_lead_to_2_results() {
+        // Given
+        Genre genre = Genre.DRAMA;
+
+        // When
+        homeController.initializeState();
+        List<Movie> filteredList = homeController.filterByGenre(homeController.allMovies, genre);
+
+        // Then
+        assertEquals(filteredList.size(), 8, "allMovies contains 8 movies with genre DRAMA.");
+    }
+
+
+
     @Test
     void filter_by_genre_WAR_should_lead_to_0_results() {
         // Given
@@ -226,6 +259,8 @@ class HomeControllerTest {
         // Then
         assertEquals(filteredList.size(), 0, "allMovies contains no movies with genre WAR.");
     }
+
+
 
     @Test
     void filter_by_genre_null_should_return_all_movies() {
