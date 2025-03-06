@@ -126,27 +126,6 @@ public class HomeController implements Initializable {
         observableMovies.setAll(movies);
     }
 
-    /* old version
-    public void handleFilterButtonClick () {
-        String selectedGenreString = (String) genreComboBox.getValue();
-        Genre selectedGenre = null;
-
-        // cast selection to type genre if it's valid
-        if (selectedGenreString != null && !selectedGenreString.isEmpty()) {
-            selectedGenre = Genre.valueOf(selectedGenreString);
-        }
-        String query = searchField.getText().trim();
-
-        // filterBySearchQuery is called first
-        List<Movie> filteredMovies = filterBySearchQuery(query);
-
-        // The result of filterBySearchQuery is passed to filterByGenre
-        filteredMovies = filterByGenre(filteredMovies, selectedGenre);
-
-        observableMovies.setAll(filteredMovies); // setAll, clears and adds
-    }
-     */
-
 
     public void sortMovies (SortState sortState) {
         if (sortState == SortState.ASCENDING) {
