@@ -3,19 +3,76 @@ package at.ac.fhcampuswien.fhmdb.models;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class Movie {
+    private String id;
     private String title;
     private String description;
     private List<Genre> genres;
+    private int releaseYear;
+    private String imgUrl;
+    private int lengthInMinutes;
+    private List<String> directors;
+    private List<String> writers;
+    private List<String> mainCast;
+    private double rating;
+
 
     public Movie(String title, String description, List<Genre> genres) {
+        this.id = UUID.randomUUID().toString();
         this.title = title;
         this.description = description;
         this.genres = genres;
+        this.releaseYear = 0;
+        this.imgUrl = "";
+        this.lengthInMinutes = 0;
+        this.rating = 0;
+    }
+
+    public Movie(String id, String title, String description, List<Genre> genres, int releaseYear,
+                 String imgUrl, int lengthInMinutes, List<String> directors, List<String> writers,
+                 List<String> mainCast, double rating) {
+        if(id == null) {
+            this.id = UUID.randomUUID().toString();
+        } else {
+            this.id = id;
+        }
+        this.title = title;
+        this.description = description;
+        this.genres = genres;
+        this.releaseYear = releaseYear;
+        this.imgUrl = imgUrl;
+        this.lengthInMinutes = lengthInMinutes;
+        this.directors = directors;
+        this.writers = writers;
+        this.mainCast = mainCast;
+        this.rating = rating;
+    }
+
+    @Override
+    public String toString() {
+        return "Movie{" +
+                "id='" + id + '\'' +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", genres=" + genres +
+                ", releaseYear=" + releaseYear +
+                ", imgUrl='" + imgUrl + '\'' +
+                ", lengthInMinutes=" + lengthInMinutes +
+                ", directors=" + directors +
+                ", writers=" + writers +
+                ", mainCast=" + mainCast +
+                ", rating=" + String.format("%.1f", rating) +
+                '}';
     }
 
     // getter
+
+    public String getId() {
+        return id;
+    }
+
     public String getTitle() {
         return title;
     }
@@ -28,6 +85,36 @@ public class Movie {
         return genres;
     }
 
+    public int getReleaseYear() {
+        return releaseYear;
+    }
+
+    public String getImgUrl() {
+        return imgUrl;
+    }
+
+    public int getLengthInMinutes() {
+        return lengthInMinutes;
+    }
+
+    public List<String> getDirectors() {
+        return directors;
+    }
+
+    public List<String> getWriters() {
+        return writers;
+    }
+
+    public List<String> getMainCast() {
+        return mainCast;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
+
+    // Dummy-List from ex1
     public static List<Movie> initializeMovies(){
         List<Movie> movies = new ArrayList<>();
 
