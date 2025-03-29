@@ -1,5 +1,6 @@
 package at.ac.fhcampuswien.fhmdb;
 
+import at.ac.fhcampuswien.fhmdb.api.MovieApi;
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.models.SortState;
@@ -25,9 +26,26 @@ class HomeControllerTest {
 
 
     @Test
+    void construct_url_constructs_correctly() {
+        // Given
+        String query = "test";
+        Genre genre = Genre.ACTION;
+        String releaseYear = "2016";
+        String ratingFrom = "8";
+
+        // When
+        String returnString = MovieApi.constructUrl(query, genre, releaseYear, ratingFrom);
+
+        // Then
+        assertEquals("https://prog2.fh-campuswien.ac.at/movies?genre=ACTION&query=test&releaseYear=2016&rating=8&", returnString);
+    }
+
+
+    // Ex1
+    @Test
     void ensure_allMovies_and_observableMovies_are_identical_initially() {
         // When
-        homeController.initializeState();
+        homeController.initializeStateWithDummyMovies();
 
         // Then
         assertEquals(homeController.allMovies, homeController.observableMovies,
@@ -42,7 +60,7 @@ class HomeControllerTest {
         String query = "Oppenheimer";
 
         // When
-        homeController.initializeState();
+        homeController.initializeStateWithDummyMovies();
         List<Movie> result = homeController.filterBySearchQuery(query);
 
         // Then
@@ -57,11 +75,11 @@ class HomeControllerTest {
         // Given
         String selectedGenreString = "";
         String query = "";
-        homeController.initializeState();
+        homeController.initializeStateWithDummyMovies();
 
         // When
         Genre selectedGenre = homeController.parseGenre(selectedGenreString);
-        List<Movie> result = homeController.applyFilters(selectedGenre, query);
+        List<Movie> result = homeController.applyFilters(selectedGenre, query, null, null);
 
         // Then
         assertEquals(homeController.allMovies, result,
@@ -76,7 +94,7 @@ class HomeControllerTest {
         String query = "oppenHeiMer";
 
         // When
-        homeController.initializeState();
+        homeController.initializeStateWithDummyMovies();
         List<Movie> result = homeController.filterBySearchQuery(query);
 
         // Then
@@ -92,7 +110,7 @@ class HomeControllerTest {
         String query = "and";
 
         // When
-        homeController.initializeState();
+        homeController.initializeStateWithDummyMovies();
         List<Movie> result = homeController.filterBySearchQuery(query);
 
         // Then
@@ -105,7 +123,7 @@ class HomeControllerTest {
     void empty_search_query_returns_all_movies() {
         // Given
         String query = "";
-        homeController.initializeState();
+        homeController.initializeStateWithDummyMovies();
 
         // When
         List<Movie> result = homeController.filterBySearchQuery(query);
@@ -122,10 +140,10 @@ class HomeControllerTest {
         // Given
         String query = "man";
         Genre genre = Genre.DRAMA;
-        homeController.initializeState();
+        homeController.initializeStateWithDummyMovies();
 
         // When
-        List<Movie> result = homeController.applyFilters(genre, query);
+        List<Movie> result = homeController.applyFilters(genre, query, null, null);
 
         // Then
         assertEquals(4, result.size());
@@ -223,7 +241,7 @@ class HomeControllerTest {
         Genre genre = Genre.THRILLER;
 
         // When
-        homeController.initializeState();
+        homeController.initializeStateWithDummyMovies();
         List<Movie> filteredList = homeController.filterByGenre(homeController.allMovies, genre);
 
         // Then
@@ -238,7 +256,7 @@ class HomeControllerTest {
         Genre genre = Genre.DRAMA;
 
         // When
-        homeController.initializeState();
+        homeController.initializeStateWithDummyMovies();
         List<Movie> filteredList = homeController.filterByGenre(homeController.allMovies, genre);
 
         // Then
@@ -253,7 +271,7 @@ class HomeControllerTest {
         Genre genre = Genre.WAR;
 
         // When
-        homeController.initializeState();
+        homeController.initializeStateWithDummyMovies();
         List<Movie> filteredList = homeController.filterByGenre(homeController.allMovies, genre);
 
         // Then
@@ -268,7 +286,7 @@ class HomeControllerTest {
         Genre genre = null;
 
         // When
-        homeController.initializeState();
+        homeController.initializeStateWithDummyMovies();
         List<Movie> filteredList = homeController.filterByGenre(homeController.allMovies, genre);
 
         // Then

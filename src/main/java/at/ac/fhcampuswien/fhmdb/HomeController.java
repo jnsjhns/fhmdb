@@ -1,5 +1,6 @@
 package at.ac.fhcampuswien.fhmdb;
 
+import at.ac.fhcampuswien.fhmdb.api.MovieApi;
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.models.SortState;
@@ -16,6 +17,7 @@ import javafx.scene.control.TextField;
 
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class HomeController implements Initializable {
     @FXML
@@ -29,6 +31,12 @@ public class HomeController implements Initializable {
 
     @FXML
     public JFXComboBox genreComboBox;
+
+    @FXML
+    public JFXComboBox releaseYearComboBox;
+
+    @FXML
+    public JFXComboBox ratingFromComboBox;
 
     @FXML
     public JFXButton sortButton;
@@ -56,15 +64,56 @@ public class HomeController implements Initializable {
         for (Genre genre : Genre.values()) {
             genreComboBox.getItems().add(genre.toString());
         }
+
+        // releaseYear comboBox
+        releaseYearComboBox.setPromptText("Filter by Release Year");
+        releaseYearComboBox.getItems().clear();
+        releaseYearComboBox.getItems().add("");
+
+        // get all ReleaseYears of allMovies
+        Set<Integer> allReleaseYears = getAllReleaseYears(allMovies);
+
+        // sort years
+        List<Integer> sortedYears = allReleaseYears.stream()
+                .sorted()
+                .toList();
+
+        // add sortedYears to ComboBox after empty String
+        releaseYearComboBox.getItems().addAll(FXCollections.observableArrayList(sortedYears));
+
+
+        // rating comboBox
+        ratingFromComboBox.setPromptText("Filter by Rating");
+        ratingFromComboBox.getItems().clear();
+        ratingFromComboBox.getItems().add("");
+        Integer[] rating = new Integer[10];
+        for (int i = 0; i < rating.length; i++) {
+            rating[i] = i;
+        }
+        ratingFromComboBox.getItems().addAll(rating);
     }
 
-    public void initializeState (){
+
+    public void initializeState () {
+        // initialize movies and SortState
+        allMovies = MovieApi.getAllMovies();
+        sortState = SortState.NONE;
+        observableMovies.setAll(allMovies);
+    }
+
+    public void initializeStateWithDummyMovies () {
         // initialize movies and SortState
         allMovies = Movie.initializeMovies();
         sortState = SortState.NONE;
         observableMovies.setAll(allMovies);
     }
 
+    public Set<Integer> getAllReleaseYears(List<Movie> allMovies) {
+        return allMovies.stream()
+                .map(Movie::getReleaseYear)
+                .filter(year -> year > 0)
+                .collect(Collectors.toSet());
+    }
 
     @FXML
     public void onSortButtonClick (ActionEvent event) {
@@ -100,9 +149,11 @@ public class HomeController implements Initializable {
 
     public void handleFilterButtonClick() {
         String selectedGenreString = getSelectedGenre();
-        String query = getSearchQuery();
         Genre selectedGenre = parseGenre(selectedGenreString);
-        List<Movie> filteredMovies = applyFilters(selectedGenre, query);
+        String query = getSearchQuery();
+        String releaseYear = getSelectedReleaseYear();
+        String rating = getSelectedRating();
+        List<Movie> filteredMovies = MovieApi.getAllMovies(query, selectedGenre, releaseYear, rating);
         updateObservableMovies(filteredMovies);
     }
 
@@ -114,13 +165,41 @@ public class HomeController implements Initializable {
         return searchField != null ? searchField.getText().trim() : "";
     }
 
+    private String getSelectedReleaseYear() {
+        if (releaseYearComboBox != null && releaseYearComboBox.getValue() != null) {
+            Object value = releaseYearComboBox.getValue();
+            if (value instanceof Integer) {
+                return String.valueOf(value);
+            }
+        }
+        return null;
+    }
+
+    // converts int to String
+    private String getSelectedRating() {
+        if (ratingFromComboBox != null && ratingFromComboBox.getValue() != null) {
+            Object value = ratingFromComboBox.getValue();
+            if (value instanceof Integer) {
+                return String.valueOf(value);
+            }
+        }
+        return null;
+    }
+
     protected Genre parseGenre(String genreString) {
         return (genreString != null && !genreString.isEmpty()) ? Genre.valueOf(genreString) : null;
     }
 
-    public List<Movie> applyFilters(Genre genre, String query) {
-        List<Movie> moviesFilteredBySearchQuery = filterBySearchQuery(query);
-        return filterByGenre(moviesFilteredBySearchQuery, genre);
+    public List<Movie> getMovies (String searchQuery, Genre genre, String releaseYear, String ratingFrom) {
+        return MovieApi.getAllMovies(searchQuery, genre, releaseYear, ratingFrom);
+    }
+
+    public List<Movie> applyFilters(Genre genre, String query, String releaseYear, String rating) {
+        List<Movie> moviesFiltered = filterBySearchQuery(query);
+        filterByGenre(moviesFiltered, genre);
+        filterByReleaseYear(moviesFiltered, releaseYear);
+        filterByRatingFrom(moviesFiltered, rating);
+        return moviesFiltered;
     }
 
     private void updateObservableMovies(List<Movie> movies) {
@@ -133,6 +212,34 @@ public class HomeController implements Initializable {
             observableMovies.sort(Comparator.comparing(Movie::getTitle));
         } else if (sortState == SortState.DESCENDING){
             observableMovies.sort(Comparator.comparing(Movie::getTitle).reversed());
+        }
+    }
+
+    // function is called after filterByReleaseYear and has the return value as argument
+    public List<Movie> filterByRatingFrom(List<Movie> moviesFilteredBySearchQueryAndGenreAndReleaseYear, String rating) {
+        List<Movie> moviesFilteredByRatingFrom = new ArrayList<>();
+        if (rating != null && !rating.isEmpty()) {
+            for (Movie movie : moviesFilteredBySearchQueryAndGenreAndReleaseYear) {
+                if (rating.equals(movie.getRating())) {
+                    moviesFilteredByRatingFrom.add(movie);
+                }
+            } return moviesFilteredByRatingFrom;
+        } else {
+            return moviesFilteredBySearchQueryAndGenreAndReleaseYear;
+        }
+    }
+
+    // function is called after filterByGenre and has the return value as argument
+    public List<Movie> filterByReleaseYear(List<Movie> moviesFilteredBySearchQueryAndGenre, String releaseYear) {
+        List<Movie> moviesFilteredByReleaseYear = new ArrayList<>();
+        if (releaseYear != null && !releaseYear.isEmpty()) {
+            for (Movie movie : moviesFilteredBySearchQueryAndGenre) {
+                if (releaseYear.equals(movie.getReleaseYear())) {
+                    moviesFilteredByReleaseYear.add(movie);
+                }
+            } return moviesFilteredByReleaseYear;
+        } else {
+            return moviesFilteredBySearchQueryAndGenre;
         }
     }
 
