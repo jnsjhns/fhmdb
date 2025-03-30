@@ -190,9 +190,6 @@ public class HomeController implements Initializable {
         return (genreString != null && !genreString.isEmpty()) ? Genre.valueOf(genreString) : null;
     }
 
-    public List<Movie> getMovies (String searchQuery, Genre genre, String releaseYear, String ratingFrom) {
-        return MovieApi.getAllMovies(searchQuery, genre, releaseYear, ratingFrom);
-    }
 
     public List<Movie> applyFilters(Genre genre, String query, String releaseYear, String rating) {
         List<Movie> moviesFiltered = filterBySearchQuery(query);
