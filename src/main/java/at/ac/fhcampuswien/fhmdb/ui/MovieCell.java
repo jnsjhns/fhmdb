@@ -15,6 +15,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 public class MovieCell extends ListCell<Movie> {
     private final Label title = new Label(); // Label for the movie title
@@ -62,11 +63,12 @@ public class MovieCell extends ListCell<Movie> {
             runtimeRatingGenres.setAlignment(Pos.CENTER_LEFT);
 
             // Layout settings for the main VBox
-            title.fontProperty().set(title.getFont().font(20)); // Set font size for the title
+            title.getFont();
+            title.fontProperty().set(Font.font(20)); // Set font size for the title
             detail.setMaxWidth(this.getScene().getWidth() - 30); // Wrap text in description label
             detail.setWrapText(true);
             layout.setPadding(new Insets(10)); // Add padding around the layout
-            layout.spacingProperty().set(10); // Add spacing between elements in the layout
+            layout.spacingProperty().set(3); // Add spacing between elements in the layout
             layout.alignmentProperty().set(Pos.CENTER_LEFT); // Align elements to the left
 
             // Button styling and fixed width
@@ -93,6 +95,11 @@ public class MovieCell extends ListCell<Movie> {
 
     private VBox getDetails(Movie movie) {
         VBox details = new VBox(); // Container for additional details
+        HBox pictureAndDetails = new HBox();
+        VBox innerBoxForDetails = new VBox();
+        innerBoxForDetails.setMinHeight(150);
+        innerBoxForDetails.alignmentProperty().set(Pos.BOTTOM_LEFT);
+        pictureAndDetails.spacingProperty().set(3);
 
         ImageView imageView = new ImageView(); // Image view for displaying the movie's image
         try {
@@ -112,10 +119,12 @@ public class MovieCell extends ListCell<Movie> {
         writers.getStyleClass().add("text-white"); // Style for writers label
         mainCast.getStyleClass().add("text-white"); // Style for main cast label
 
-        details.getChildren().add(imageView); // Add image view to container first (above text)
-        details.getChildren().add(directors); // Add directors label to container
-        details.getChildren().add(writers); // Add writers label to container
-        details.getChildren().add(mainCast); // Add main cast label to container
+        pictureAndDetails.getChildren().add(imageView);
+        innerBoxForDetails.getChildren().add(directors);
+        innerBoxForDetails.getChildren().add(writers);
+        innerBoxForDetails.getChildren().add(mainCast);
+        pictureAndDetails.getChildren().add(innerBoxForDetails);
+        details.getChildren().add(pictureAndDetails);
 
         return details; // Return container with additional details and image
     }
